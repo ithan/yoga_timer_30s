@@ -3,71 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>30 Second Timer</title>
+    <title>30 Second Countdown Timer</title>
+    <meta name="description" content="Accessible 30-second countdown timer with visual and audio feedback">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
+        /* Modern CSS with nesting and HSL colors */
+        :root {
+            --primary-hue: 248;
+            --success-hue: 142;
+            --warning-hue: 38;
+            --danger-hue: 0;
+            --neutral-hue: 220;
+            
+            --primary: hsl(var(--primary-hue) 95% 65%);
+            --primary-hover: hsl(var(--primary-hue) 95% 55%);
+            --success: hsl(var(--success-hue) 76% 47%);
+            --warning: hsl(var(--warning-hue) 92% 50%);
+            --danger: hsl(var(--danger-hue) 84% 60%);
+            
+            --text-primary: hsl(var(--neutral-hue) 20% 14%);
+            --text-secondary: hsl(var(--neutral-hue) 13% 45%);
+            --surface: hsl(var(--neutral-hue) 14% 96%);
+            --card-surface: hsl(0 0% 100%);
+            
+            --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.05);
+            --shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.1), 0 2px 4px -2px hsl(0 0% 0% / 0.1);
+            --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.1), 0 4px 6px -4px hsl(0 0% 0% / 0.1);
+            --shadow-xl: 0 20px 25px -5px hsl(0 0% 0% / 0.1), 0 8px 10px -6px hsl(0 0% 0% / 0.1);
+            
+            --border-radius-sm: 0.375rem;
+            --border-radius-md: 0.5rem;
+            --border-radius-lg: 1rem;
+            --border-radius-xl: 1.5rem;
+            
+            --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            :root {
+                --transition-fast: 0ms;
+                --transition-normal: 0ms;
+                --transition-slow: 0ms;
+            }
+            
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --text-primary: hsl(var(--neutral-hue) 14% 96%);
+                --text-secondary: hsl(var(--neutral-hue) 13% 65%);
+                --surface: hsl(var(--neutral-hue) 20% 14%);
+                --card-surface: hsl(var(--neutral-hue) 15% 18%);
+            }
+        }
+
+        /* Reset and base styles */
+        *,
+        *::before,
+        *::after {
             box-sizing: border-box;
         }
 
-        :root {
-            --primary-color: #6366f1;
-            --primary-hover: #4f46e5;
-            --success-color: #10b981;
-            --warning-color: #f59e0b;
-            --danger-color: #ef4444;
-            --text-color: #1f2937;
-            --text-light: #6b7280;
-            --bg-color: #f8fafc;
-            --card-bg: #ffffff;
-            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            --shadow-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        * {
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, var(--bg-color) 0%, #e2e8f0 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            background: linear-gradient(135deg, var(--surface) 0%, hsl(var(--neutral-hue) 20% 90%) 100%);
             min-height: 100vh;
+            min-height: 100dvh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 1rem;
-            color: var(--text-color);
+            color: var(--text-primary);
+            
+            @media (max-width: 768px) {
+                padding: 0.75rem;
+            }
         }
 
+        /* Main container */
         .timer_container {
-            background: var(--card-bg);
-            border-radius: 2rem;
+            background: var(--card-surface);
+            border-radius: var(--border-radius-xl);
             padding: 2rem;
-            box-shadow: var(--shadow-lg);
+            box-shadow: var(--shadow-xl);
             text-align: center;
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid hsl(0 0% 100% / 0.1);
+            position: relative;
+            
+            @media (max-width: 480px) {
+                padding: 1.5rem;
+                border-radius: var(--border-radius-lg);
+                max-width: 100%;
+            }
         }
 
+        /* Typography */
+        .timer_title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            
+            @media (max-width: 480px) {
+                font-size: 1.25rem;
+                margin-bottom: 1rem;
+            }
+        }
+
+        /* Timer display */
         .timer_display {
-            font-size: 6rem;
+            font-size: clamp(4rem, 12vw, 6rem);
             font-weight: 800;
-            color: var(--text-color);
+            color: var(--text-primary);
             margin: 2rem 0;
             font-variant-numeric: tabular-nums;
             line-height: 1;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .timer_display.warning {
-            color: var(--warning-color);
-            transform: scale(1.05);
-        }
-
-        .timer_display.danger {
-            color: var(--danger-color);
-            transform: scale(1.1);
-            animation: pulse 0.5s ease-in-out infinite alternate;
+            text-shadow: 0 2px 4px hsl(0 0% 0% / 0.1);
+            transition: all var(--transition-normal);
+            
+            &.warning {
+                color: var(--warning);
+                transform: scale(1.02);
+            }
+            
+            &.danger {
+                color: var(--danger);
+                transform: scale(1.05);
+                
+                @media (prefers-reduced-motion: no-preference) {
+                    animation: pulse 0.5s ease-in-out infinite alternate;
+                }
+            }
+            
+            @media (max-width: 480px) {
+                margin: 1.5rem 0;
+            }
         }
 
         @keyframes pulse {
@@ -75,266 +162,353 @@
             to { opacity: 0.7; }
         }
 
-        .start_button {
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
-            color: white;
+        /* Progress ring */
+        .progress_ring {
+            width: clamp(160px, 40vw, 200px);
+            height: clamp(160px, 40vw, 200px);
+            margin: 1rem auto;
+            position: relative;
+            
+            svg {
+                width: 100%;
+                height: 100%;
+                transform: rotate(-90deg);
+                filter: drop-shadow(0 2px 4px hsl(0 0% 0% / 0.1));
+            }
+            
+            circle {
+                fill: none;
+                stroke-width: 8;
+                stroke-linecap: round;
+                
+                &.progress_bg {
+                    stroke: hsl(var(--neutral-hue) 13% 85%);
+                    
+                    @media (prefers-color-scheme: dark) {
+                        stroke: hsl(var(--neutral-hue) 15% 25%);
+                    }
+                }
+                
+                &.progress_bar {
+                    stroke: var(--primary);
+                    stroke-dasharray: 565.48;
+                    stroke-dashoffset: 565.48;
+                    transition: stroke-dashoffset 1s linear, stroke var(--transition-normal);
+                    
+                    &.warning {
+                        stroke: var(--warning);
+                    }
+                    
+                    &.danger {
+                        stroke: var(--danger);
+                    }
+                }
+            }
+        }
+
+        /* Buttons */
+        .btn {
             border: none;
-            border-radius: 1rem;
-            padding: 1.5rem 3rem;
-            font-size: 1.25rem;
+            border-radius: var(--border-radius-md);
+            font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: var(--shadow);
+            transition: all var(--transition-normal);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.025em;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            
+            &:focus-visible {
+                outline: 2px solid var(--primary);
+                outline-offset: 2px;
+            }
+            
+            &:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+                transform: none !important;
+            }
+        }
+
+        .start_button {
+            @extend .btn;
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            color: white;
+            padding: 1.5rem 3rem;
+            font-size: 1.25rem;
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-lg);
             width: 100%;
             max-width: 280px;
+            
+            &:hover:not(:disabled) {
+                transform: translateY(-2px);
+                box-shadow: 0 20px 40px -10px hsl(var(--primary-hue) 95% 65% / 0.4);
+            }
+            
+            &:active:not(:disabled) {
+                transform: translateY(0);
+            }
+            
+            @media (max-width: 480px) {
+                padding: 1.25rem 2.5rem;
+                font-size: 1.125rem;
+            }
         }
 
-        .start_button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 20px 40px -10px rgba(99, 102, 241, 0.4);
-        }
-
-        .start_button:active {
-            transform: translateY(0);
-        }
-
+        /* Control buttons */
         .control_buttons {
             display: flex;
             gap: 1rem;
             margin-top: 2rem;
             opacity: 0;
             transform: translateY(20px);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .control_buttons.show {
-            opacity: 1;
-            transform: translateY(0);
+            transition: all var(--transition-slow);
+            
+            &.show {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            
+            @media (max-width: 480px) {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
         }
 
         .control_btn {
+            @extend .btn;
             flex: 1;
             padding: 1rem 1.5rem;
-            border: none;
-            border-radius: 0.75rem;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
+            border-radius: var(--border-radius-md);
+            
+            &:hover:not(:disabled) {
+                transform: translateY(-1px);
+            }
+            
+            &.pause_btn {
+                background: linear-gradient(135deg, var(--warning), hsl(var(--warning-hue) 92% 40%));
+                color: white;
+                box-shadow: 0 4px 15px hsl(var(--warning-hue) 92% 50% / 0.3);
+                
+                &:hover:not(:disabled) {
+                    box-shadow: 0 8px 25px hsl(var(--warning-hue) 92% 50% / 0.4);
+                }
+            }
+            
+            &.restart_btn {
+                background: linear-gradient(135deg, var(--danger), hsl(var(--danger-hue) 84% 50%));
+                color: white;
+                box-shadow: 0 4px 15px hsl(var(--danger-hue) 84% 60% / 0.3);
+                
+                &:hover:not(:disabled) {
+                    box-shadow: 0 8px 25px hsl(var(--danger-hue) 84% 60% / 0.4);
+                }
+            }
         }
 
-        .pause_btn {
-            background: linear-gradient(135deg, var(--warning-color), #d97706);
-            color: white;
-            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
-        }
-
-        .pause_btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4);
-        }
-
-        .restart_btn {
-            background: linear-gradient(135deg, var(--danger-color), #dc2626);
-            color: white;
-            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
-        }
-
-        .restart_btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+        /* Utility classes */
+        .visually_hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
         }
 
         .hidden {
             display: none;
         }
-
-        .title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            color: var(--text-color);
-            opacity: 0.8;
-        }
-
-        .progress_ring {
-            width: 200px;
-            height: 200px;
-            margin: 1rem auto;
-            position: relative;
-        }
-
-        .progress_ring svg {
-            width: 100%;
-            height: 100%;
-            transform: rotate(-90deg);
-        }
-
-        .progress_ring circle {
-            fill: none;
-            stroke-width: 8;
-            stroke-linecap: round;
-        }
-
-        .progress_bg {
-            stroke: #e5e7eb;
-        }
-
-        .progress_bar {
-            stroke: var(--primary-color);
-            stroke-dasharray: 565.48;
-            stroke-dashoffset: 565.48;
-            transition: stroke-dashoffset 1s linear, stroke 0.3s ease;
-        }
-
-        .progress_bar.warning {
-            stroke: var(--warning-color);
-        }
-
-        .progress_bar.danger {
-            stroke: var(--danger-color);
-        }
-
-        @media (max-width: 480px) {
-            .timer_container {
-                padding: 1.5rem;
-                border-radius: 1.5rem;
-            }
-
-            .timer_display {
-                font-size: 4.5rem;
-                margin: 1.5rem 0;
-            }
-
-            .start_button {
-                padding: 1.25rem 2.5rem;
-                font-size: 1.1rem;
-            }
-
-            .progress_ring {
-                width: 160px;
-                height: 160px;
-            }
-
-            .control_buttons {
-                flex-direction: column;
-            }
-        }
     </style>
 </head>
 <body>
-    <div class="timer_container">
-        <h1 class="title">30 Second Timer</h1>
+    <main class="timer_container">
+        <h1 class="timer_title">30 Second Timer</h1>
         
-        <div class="progress_ring">
-            <svg>
+        <!-- Progress ring with accessible description -->
+        <div class="progress_ring" role="img" aria-labelledby="progress-description">
+            <div id="progress-description" class="visually_hidden">
+                Timer progress indicator showing time remaining
+            </div>
+            <svg aria-hidden="true">
                 <circle class="progress_bg" cx="100" cy="100" r="90"></circle>
                 <circle class="progress_bar" cx="100" cy="100" r="90"></circle>
             </svg>
         </div>
 
-        <div class="timer_display" id="display">30</div>
+        <!-- Timer display with live region for screen readers -->
+        <div 
+            class="timer_display" 
+            id="display"
+            role="timer"
+            aria-live="polite"
+            aria-label="Timer display"
+        >30</div>
         
-        <button class="start_button" id="start_btn">Start Timer</button>
-        
-        <div class="control_buttons" id="control_buttons">
-            <button class="control_btn pause_btn" id="pause_btn">Pause</button>
-            <button class="control_btn restart_btn" id="restart_btn">Restart</button>
+        <!-- Start button -->
+        <button 
+            class="start_button" 
+            id="start_btn"
+            aria-describedby="start-description"
+        >
+            Start Timer
+        </button>
+        <div id="start-description" class="visually_hidden">
+            Click to start a 30 second countdown timer
         </div>
-    </div>
+        
+        <!-- Control buttons with proper ARIA labels -->
+        <div class="control_buttons" id="control_buttons">
+            <button 
+                class="control_btn pause_btn" 
+                id="pause_btn"
+                aria-label="Pause or resume timer"
+            >
+                Pause
+            </button>
+            <button 
+                class="control_btn restart_btn" 
+                id="restart_btn"
+                aria-label="Restart timer from beginning"
+            >
+                Restart
+            </button>
+        </div>
+
+        <!-- Status announcements for screen readers -->
+        <div id="status_announcer" class="visually_hidden" aria-live="assertive" aria-atomic="true"></div>
+    </main>
 
     <script>
+        /**
+         * Modern countdown timer with accessibility features
+         * Supports 30-second countdown with visual and audio feedback
+         */
         class CountdownTimer {
+            // Timer configuration constants
+            static INITIAL_TIME = 30;
+            static WARNING_THRESHOLD = 10;
+            static DANGER_THRESHOLD = 5;
+            static CIRCLE_CIRCUMFERENCE = 565.48; // 2 * π * 90
+            
             constructor() {
-                this.initial_time = 30;
-                this.current_time = this.initial_time;
+                this.init_state();
+                this.cache_dom_elements();
+                this.bind_event_listeners();
+                this.setup_audio_context();
+            }
+
+            /**
+             * Initialize timer state variables
+             */
+            init_state() {
+                this.current_time = CountdownTimer.INITIAL_TIME;
                 this.is_running = false;
                 this.is_paused = false;
                 this.timer_interval = null;
                 this.audio_context = null;
-                
-                this.display_element = document.getElementById('display');
-                this.start_button = document.getElementById('start_btn');
-                this.control_buttons = document.getElementById('control_buttons');
-                this.pause_button = document.getElementById('pause_btn');
-                this.restart_button = document.getElementById('restart_btn');
-                this.progress_bar = document.querySelector('.progress_bar');
-                
-                this.init_event_listeners();
-                this.create_audio_context();
             }
 
-            init_event_listeners() {
-                this.start_button.addEventListener('click', () => this.start_timer());
-                this.pause_button.addEventListener('click', () => this.toggle_pause());
-                this.restart_button.addEventListener('click', () => this.restart_timer());
+            /**
+             * Cache DOM elements for performance
+             */
+            cache_dom_elements() {
+                this.elements = {
+                    display: document.getElementById('display'),
+                    start_button: document.getElementById('start_btn'),
+                    control_buttons: document.getElementById('control_buttons'),
+                    pause_button: document.getElementById('pause_btn'),
+                    restart_button: document.getElementById('restart_btn'),
+                    progress_bar: document.querySelector('.progress_bar'),
+                    status_announcer: document.getElementById('status_announcer')
+                };
             }
 
-            create_audio_context() {
+            /**
+             * Bind event listeners to UI elements
+             */
+            bind_event_listeners() {
+                this.elements.start_button.addEventListener('click', () => this.start_timer());
+                this.elements.pause_button.addEventListener('click', () => this.toggle_pause());
+                this.elements.restart_button.addEventListener('click', () => this.restart_timer());
+                
+                // Handle keyboard navigation
+                document.addEventListener('keydown', (event) => this.handle_keyboard_shortcuts(event));
+            }
+
+            /**
+             * Setup Web Audio API for sound effects
+             */
+            setup_audio_context() {
                 try {
                     this.audio_context = new (window.AudioContext || window.webkitAudioContext)();
                 } catch (error) {
-                    console.warn('Audio context not supported:', error);
+                    console.warn('Web Audio API not supported:', error);
+                    this.audio_context = null;
                 }
             }
 
-            play_completion_sound() {
-                if (!this.audio_context) return;
-
-                try {
-                    // Create oscillators for a pleasant chime sound
-                    const frequencies = [523.25, 659.25, 783.99]; // C5, E5, G5
-                    
-                    frequencies.forEach((freq, index) => {
-                        const oscillator = this.audio_context.createOscillator();
-                        const gain_node = this.audio_context.createGain();
-                        
-                        oscillator.connect(gain_node);
-                        gain_node.connect(this.audio_context.destination);
-                        
-                        oscillator.frequency.setValueAtTime(freq, this.audio_context.currentTime);
-                        oscillator.type = 'sine';
-                        
-                        const start_time = this.audio_context.currentTime + (index * 0.15);
-                        const end_time = start_time + 0.8;
-                        
-                        gain_node.gain.setValueAtTime(0, start_time);
-                        gain_node.gain.linearRampToValueAtTime(0.3, start_time + 0.1);
-                        gain_node.gain.exponentialRampToValueAtTime(0.01, end_time);
-                        
-                        oscillator.start(start_time);
-                        oscillator.stop(end_time);
-                    });
-                } catch (error) {
-                    console.warn('Could not play sound:', error);
+            /**
+             * Handle keyboard shortcuts for accessibility
+             * @param {KeyboardEvent} event - The keyboard event
+             */
+            handle_keyboard_shortcuts(event) {
+                // Space bar to start/pause timer
+                if (event.code === 'Space' && !this.is_running) {
+                    event.preventDefault();
+                    this.start_timer();
+                } else if (event.code === 'Space' && this.is_running) {
+                    event.preventDefault();
+                    this.toggle_pause();
+                }
+                
+                // R key to restart
+                if (event.code === 'KeyR' && this.is_running) {
+                    event.preventDefault();
+                    this.restart_timer();
                 }
             }
 
+            /**
+             * Start the countdown timer
+             */
             start_timer() {
-                if (this.audio_context && this.audio_context.state === 'suspended') {
+                // Resume audio context if suspended (required by some browsers)
+                if (this.audio_context?.state === 'suspended') {
                     this.audio_context.resume();
                 }
 
                 this.is_running = true;
                 this.is_paused = false;
-                this.start_button.classList.add('hidden');
-                this.control_buttons.classList.add('show');
-                this.pause_button.textContent = 'Pause';
                 
-                this.run_timer();
+                // Update UI state
+                this.elements.start_button.classList.add('hidden');
+                this.elements.control_buttons.classList.add('show');
+                this.elements.pause_button.textContent = 'Pause';
+                
+                // Announce to screen readers
+                this.announce_status('Timer started. 30 seconds countdown begun.');
+                
+                this.run_countdown();
             }
 
-            run_timer() {
+            /**
+             * Main countdown loop
+             */
+            run_countdown() {
                 this.timer_interval = setInterval(() => {
                     if (!this.is_paused) {
                         this.current_time--;
                         this.update_display();
-                        this.update_progress();
+                        this.update_progress_ring();
                         
                         if (this.current_time <= 0) {
                             this.complete_timer();
@@ -343,68 +517,178 @@
                 }, 1000);
             }
 
+            /**
+             * Update the timer display with current time and visual states
+             */
             update_display() {
-                this.display_element.textContent = this.current_time;
+                this.elements.display.textContent = this.current_time;
                 
-                // Add visual warnings
-                this.display_element.classList.remove('warning', 'danger');
-                this.progress_bar.classList.remove('warning', 'danger');
+                // Remove existing state classes
+                this.elements.display.classList.remove('warning', 'danger');
+                this.elements.progress_bar.classList.remove('warning', 'danger');
                 
-                if (this.current_time <= 5 && this.current_time > 0) {
-                    this.display_element.classList.add('danger');
-                    this.progress_bar.classList.add('danger');
-                } else if (this.current_time <= 10) {
-                    this.display_element.classList.add('warning');
-                    this.progress_bar.classList.add('warning');
+                // Apply appropriate state based on remaining time
+                if (this.current_time <= CountdownTimer.DANGER_THRESHOLD && this.current_time > 0) {
+                    this.elements.display.classList.add('danger');
+                    this.elements.progress_bar.classList.add('danger');
+                    
+                    if (this.current_time === CountdownTimer.DANGER_THRESHOLD) {
+                        this.announce_status(`Warning: ${this.current_time} seconds remaining`);
+                    }
+                } else if (this.current_time <= CountdownTimer.WARNING_THRESHOLD) {
+                    this.elements.display.classList.add('warning');
+                    this.elements.progress_bar.classList.add('warning');
+                    
+                    if (this.current_time === CountdownTimer.WARNING_THRESHOLD) {
+                        this.announce_status(`${this.current_time} seconds remaining`);
+                    }
                 }
             }
 
-            update_progress() {
-                const progress = (this.initial_time - this.current_time) / this.initial_time;
-                const circumference = 2 * Math.PI * 90; // radius = 90
-                const offset = circumference - (progress * circumference);
-                this.progress_bar.style.strokeDashoffset = offset;
+            /**
+             * Update the circular progress indicator
+             */
+            update_progress_ring() {
+                const progress = (CountdownTimer.INITIAL_TIME - this.current_time) / CountdownTimer.INITIAL_TIME;
+                const offset = CountdownTimer.CIRCLE_CIRCUMFERENCE - (progress * CountdownTimer.CIRCLE_CIRCUMFERENCE);
+                this.elements.progress_bar.style.strokeDashoffset = offset;
             }
 
+            /**
+             * Toggle pause/resume state
+             */
             toggle_pause() {
                 this.is_paused = !this.is_paused;
-                this.pause_button.textContent = this.is_paused ? 'Resume' : 'Pause';
+                const button_text = this.is_paused ? 'Resume' : 'Pause';
+                const status_message = this.is_paused ? 'Timer paused' : 'Timer resumed';
+                
+                this.elements.pause_button.textContent = button_text;
+                this.announce_status(status_message);
             }
 
+            /**
+             * Restart timer to initial state
+             */
             restart_timer() {
-                this.reset_timer();
-                this.start_button.classList.remove('hidden');
-                this.control_buttons.classList.remove('show');
+                this.reset_timer_state();
+                
+                // Update UI
+                this.elements.start_button.classList.remove('hidden');
+                this.elements.control_buttons.classList.remove('show');
+                
+                this.announce_status('Timer restarted');
             }
 
+            /**
+             * Handle timer completion
+             */
             complete_timer() {
                 clearInterval(this.timer_interval);
                 this.is_running = false;
                 this.current_time = 0;
-                this.display_element.textContent = '0';
-                this.display_element.classList.add('danger');
+                
+                // Final display update
+                this.elements.display.textContent = '0';
+                this.elements.display.classList.add('danger');
+                
+                // Play completion sound with multiple loops
                 this.play_completion_sound();
                 
-                // Auto-reset after 2 seconds
+                // Announce completion
+                this.announce_status('Timer completed! Time is up.');
+                
+                // Auto-reset after 3 seconds for better UX
                 setTimeout(() => {
                     this.restart_timer();
-                }, 2000);
+                }, 3000);
             }
 
-            reset_timer() {
+            /**
+             * Play enhanced completion sound with multiple loops
+             */
+            play_completion_sound() {
+                if (!this.audio_context) {
+                    // Fallback for browsers without Web Audio API
+                    try {
+                        const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJiNjmhfjJCQjY2QjI+NjY6NjYyOjYiJhYaBhYaGjY6NjY6NjY2OjY2NjY2NjI2NjY2MjI2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjI=');
+                        audio.play().catch(e => console.warn('Could not play fallback audio:', e));
+                    } catch (error) {
+                        console.warn('No audio support available:', error);
+                    }
+                    return;
+                }
+
+                try {
+                    // Create a more pleasant chime sound with multiple loops
+                    const frequencies = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+                    const loop_count = 3; // Play 3 times for better visibility
+                    
+                    for (let loop = 0; loop < loop_count; loop++) {
+                        frequencies.forEach((frequency, index) => {
+                            const oscillator = this.audio_context.createOscillator();
+                            const gain_node = this.audio_context.createGain();
+                            
+                            // Connect audio nodes
+                            oscillator.connect(gain_node);
+                            gain_node.connect(this.audio_context.destination);
+                            
+                            // Configure oscillator
+                            oscillator.frequency.setValueAtTime(frequency, this.audio_context.currentTime);
+                            oscillator.type = 'sine';
+                            
+                            // Calculate timing for this loop and note
+                            const loop_delay = loop * 1.2; // 1.2 seconds between each loop
+                            const note_delay = index * 0.15; // 0.15 seconds between notes
+                            const start_time = this.audio_context.currentTime + loop_delay + note_delay;
+                            const end_time = start_time + 0.6;
+                            
+                            // Configure gain envelope for smooth attack and release
+                            gain_node.gain.setValueAtTime(0, start_time);
+                            gain_node.gain.linearRampToValueAtTime(0.2, start_time + 0.05);
+                            gain_node.gain.exponentialRampToValueAtTime(0.01, end_time);
+                            
+                            // Start and stop oscillator
+                            oscillator.start(start_time);
+                            oscillator.stop(end_time);
+                        });
+                    }
+                } catch (error) {
+                    console.warn('Could not play Web Audio API sound:', error);
+                }
+            }
+
+            /**
+             * Reset timer to initial state
+             */
+            reset_timer_state() {
                 clearInterval(this.timer_interval);
                 this.is_running = false;
                 this.is_paused = false;
-                this.current_time = this.initial_time;
-                this.display_element.textContent = this.current_time;
-                this.display_element.classList.remove('warning', 'danger');
-                this.progress_bar.classList.remove('warning', 'danger');
-                this.progress_bar.style.strokeDashoffset = '565.48';
-                this.pause_button.textContent = 'Pause';
+                this.current_time = CountdownTimer.INITIAL_TIME;
+                
+                // Reset display
+                this.elements.display.textContent = this.current_time;
+                this.elements.display.classList.remove('warning', 'danger');
+                this.elements.progress_bar.classList.remove('warning', 'danger');
+                this.elements.progress_bar.style.strokeDashoffset = CountdownTimer.CIRCLE_CIRCUMFERENCE;
+                this.elements.pause_button.textContent = 'Pause';
+            }
+
+            /**
+             * Announce status updates to screen readers
+             * @param {string} message - Message to announce
+             */
+            announce_status(message) {
+                this.elements.status_announcer.textContent = message;
+                
+                // Clear the message after a brief delay to allow for re-announcement
+                setTimeout(() => {
+                    this.elements.status_announcer.textContent = '';
+                }, 1000);
             }
         }
 
-        // Initialize the timer when the page loads
+        // Initialize timer when DOM is fully loaded
         document.addEventListener('DOMContentLoaded', () => {
             new CountdownTimer();
         });
