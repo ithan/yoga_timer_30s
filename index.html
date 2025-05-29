@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>30 Second Timer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #6366f1;
+            --primary-hover: #4f46e5;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-color: #1f2937;
+            --text-light: #6b7280;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--bg-color) 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            color: var(--text-color);
+        }
+
+        .timer_container {
+            background: var(--card-bg);
+            border-radius: 2rem;
+            padding: 2rem;
+            box-shadow: var(--shadow-lg);
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .timer_display {
+            font-size: 6rem;
+            font-weight: 800;
+            color: var(--text-color);
+            margin: 2rem 0;
+            font-variant-numeric: tabular-nums;
+            line-height: 1;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .timer_display.warning {
+            color: var(--warning-color);
+            transform: scale(1.05);
+        }
+
+        .timer_display.danger {
+            color: var(--danger-color);
+            transform: scale(1.1);
+            animation: pulse 0.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { opacity: 1; }
+            to { opacity: 0.7; }
+        }
+
+        .start_button {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+            color: white;
+            border: none;
+            border-radius: 1rem;
+            padding: 1.5rem 3rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            width: 100%;
+            max-width: 280px;
+        }
+
+        .start_button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px -10px rgba(99, 102, 241, 0.4);
+        }
+
+        .start_button:active {
+            transform: translateY(0);
+        }
+
+        .control_buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .control_buttons.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .control_btn {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            border: none;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .pause_btn {
+            background: linear-gradient(135deg, var(--warning-color), #d97706);
+            color: white;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+        }
+
+        .pause_btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4);
+        }
+
+        .restart_btn {
+            background: linear-gradient(135deg, var(--danger-color), #dc2626);
+            color: white;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+        }
+
+        .restart_btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+            opacity: 0.8;
+        }
+
+        .progress_ring {
+            width: 200px;
+            height: 200px;
+            margin: 1rem auto;
+            position: relative;
+        }
+
+        .progress_ring svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .progress_ring circle {
+            fill: none;
+            stroke-width: 8;
+            stroke-linecap: round;
+        }
+
+        .progress_bg {
+            stroke: #e5e7eb;
+        }
+
+        .progress_bar {
+            stroke: var(--primary-color);
+            stroke-dasharray: 565.48;
+            stroke-dashoffset: 565.48;
+            transition: stroke-dashoffset 1s linear, stroke 0.3s ease;
+        }
+
+        .progress_bar.warning {
+            stroke: var(--warning-color);
+        }
+
+        .progress_bar.danger {
+            stroke: var(--danger-color);
+        }
+
+        @media (max-width: 480px) {
+            .timer_container {
+                padding: 1.5rem;
+                border-radius: 1.5rem;
+            }
+
+            .timer_display {
+                font-size: 4.5rem;
+                margin: 1.5rem 0;
+            }
+
+            .start_button {
+                padding: 1.25rem 2.5rem;
+                font-size: 1.1rem;
+            }
+
+            .progress_ring {
+                width: 160px;
+                height: 160px;
+            }
+
+            .control_buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="timer_container">
+        <h1 class="title">30 Second Timer</h1>
+        
+        <div class="progress_ring">
+            <svg>
+                <circle class="progress_bg" cx="100" cy="100" r="90"></circle>
+                <circle class="progress_bar" cx="100" cy="100" r="90"></circle>
+            </svg>
+        </div>
+
+        <div class="timer_display" id="display">30</div>
+        
+        <button class="start_button" id="start_btn">Start Timer</button>
+        
+        <div class="control_buttons" id="control_buttons">
+            <button class="control_btn pause_btn" id="pause_btn">Pause</button>
+            <button class="control_btn restart_btn" id="restart_btn">Restart</button>
+        </div>
+    </div>
+
+    <script>
+        class CountdownTimer {
+            constructor() {
+                this.initial_time = 30;
+                this.current_time = this.initial_time;
+                this.is_running = false;
+                this.is_paused = false;
+                this.timer_interval = null;
+                this.audio_context = null;
+                
+                this.display_element = document.getElementById('display');
+                this.start_button = document.getElementById('start_btn');
+                this.control_buttons = document.getElementById('control_buttons');
+                this.pause_button = document.getElementById('pause_btn');
+                this.restart_button = document.getElementById('restart_btn');
+                this.progress_bar = document.querySelector('.progress_bar');
+                
+                this.init_event_listeners();
+                this.create_audio_context();
+            }
+
+            init_event_listeners() {
+                this.start_button.addEventListener('click', () => this.start_timer());
+                this.pause_button.addEventListener('click', () => this.toggle_pause());
+                this.restart_button.addEventListener('click', () => this.restart_timer());
+            }
+
+            create_audio_context() {
+                try {
+                    this.audio_context = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (error) {
+                    console.warn('Audio context not supported:', error);
+                }
+            }
+
+            play_completion_sound() {
+                if (!this.audio_context) return;
+
+                try {
+                    // Create oscillators for a pleasant chime sound
+                    const frequencies = [523.25, 659.25, 783.99]; // C5, E5, G5
+                    
+                    frequencies.forEach((freq, index) => {
+                        const oscillator = this.audio_context.createOscillator();
+                        const gain_node = this.audio_context.createGain();
+                        
+                        oscillator.connect(gain_node);
+                        gain_node.connect(this.audio_context.destination);
+                        
+                        oscillator.frequency.setValueAtTime(freq, this.audio_context.currentTime);
+                        oscillator.type = 'sine';
+                        
+                        const start_time = this.audio_context.currentTime + (index * 0.15);
+                        const end_time = start_time + 0.8;
+                        
+                        gain_node.gain.setValueAtTime(0, start_time);
+                        gain_node.gain.linearRampToValueAtTime(0.3, start_time + 0.1);
+                        gain_node.gain.exponentialRampToValueAtTime(0.01, end_time);
+                        
+                        oscillator.start(start_time);
+                        oscillator.stop(end_time);
+                    });
+                } catch (error) {
+                    console.warn('Could not play sound:', error);
+                }
+            }
+
+            start_timer() {
+                if (this.audio_context && this.audio_context.state === 'suspended') {
+                    this.audio_context.resume();
+                }
+
+                this.is_running = true;
+                this.is_paused = false;
+                this.start_button.classList.add('hidden');
+                this.control_buttons.classList.add('show');
+                this.pause_button.textContent = 'Pause';
+                
+                this.run_timer();
+            }
+
+            run_timer() {
+                this.timer_interval = setInterval(() => {
+                    if (!this.is_paused) {
+                        this.current_time--;
+                        this.update_display();
+                        this.update_progress();
+                        
+                        if (this.current_time <= 0) {
+                            this.complete_timer();
+                        }
+                    }
+                }, 1000);
+            }
+
+            update_display() {
+                this.display_element.textContent = this.current_time;
+                
+                // Add visual warnings
+                this.display_element.classList.remove('warning', 'danger');
+                this.progress_bar.classList.remove('warning', 'danger');
+                
+                if (this.current_time <= 5 && this.current_time > 0) {
+                    this.display_element.classList.add('danger');
+                    this.progress_bar.classList.add('danger');
+                } else if (this.current_time <= 10) {
+                    this.display_element.classList.add('warning');
+                    this.progress_bar.classList.add('warning');
+                }
+            }
+
+            update_progress() {
+                const progress = (this.initial_time - this.current_time) / this.initial_time;
+                const circumference = 2 * Math.PI * 90; // radius = 90
+                const offset = circumference - (progress * circumference);
+                this.progress_bar.style.strokeDashoffset = offset;
+            }
+
+            toggle_pause() {
+                this.is_paused = !this.is_paused;
+                this.pause_button.textContent = this.is_paused ? 'Resume' : 'Pause';
+            }
+
+            restart_timer() {
+                this.reset_timer();
+                this.start_button.classList.remove('hidden');
+                this.control_buttons.classList.remove('show');
+            }
+
+            complete_timer() {
+                clearInterval(this.timer_interval);
+                this.is_running = false;
+                this.current_time = 0;
+                this.display_element.textContent = '0';
+                this.display_element.classList.add('danger');
+                this.play_completion_sound();
+                
+                // Auto-reset after 2 seconds
+                setTimeout(() => {
+                    this.restart_timer();
+                }, 2000);
+            }
+
+            reset_timer() {
+                clearInterval(this.timer_interval);
+                this.is_running = false;
+                this.is_paused = false;
+                this.current_time = this.initial_time;
+                this.display_element.textContent = this.current_time;
+                this.display_element.classList.remove('warning', 'danger');
+                this.progress_bar.classList.remove('warning', 'danger');
+                this.progress_bar.style.strokeDashoffset = '565.48';
+                this.pause_button.textContent = 'Pause';
+            }
+        }
+
+        // Initialize the timer when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new CountdownTimer();
+        });
+    </script>
+</body>
+</html>
